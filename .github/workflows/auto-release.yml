@@ -8,89 +8,83 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        
+      - uses: actions/checkout@v4
+
+      - name: Generate version
+        id: version
+        run: echo "VERSION=v$(date +'%Y.%m.%d.%H%M%S')" >> $GITHUB_OUTPUT
+
       - name: Generate build files
         run: |
-          mkdir myapp
+          mkdir -p myapp
+
           echo "# My App" > myapp/README.txt
-          echo "Version: v${{ github.run_number }}" > myapp/version.txt
+          echo "Version: ${{ steps.version.outputs.VERSION }}" > myapp/version.txt
           echo "Built on: $(date)" >> myapp/version.txt
 
-          echo @echo off > myapp/start.bat
-          echo title MyApp v${{ github.run_number }} >> myapp/start.bat
-          echo color 0A >> myapp/start.bat
-          echo cls >> myapp/start.bat
-          echo echo ====================================== >> myapp/start.bat
-          echo echo        MY APP - OFFICIAL RELEASE       >> myapp/start.bat
-          echo echo ====================================== >> myapp/start.bat
-          echo echo. >> myapp/start.bat
-          echo echo Version: v${{ github.run_number }} >> myapp/start.bat
-          echo echo. >> myapp/start.bat
-          echo echo Running on: %%COMPUTERNAME%% >> myapp/start.bat
-          echo echo Username: %%USERNAME%% >> myapp/start.bat
-          echo echo. >> myapp/start.bat
-          echo echo Loading... >> myapp/start.bat
-          echo ping localhost -n 2 ^>nul >> myapp/start.bat
-          echo cls >> myapp/start.bat
-          echo :menu >> myapp/start.bat
-          echo echo ====================================== >> myapp/start.bat
-          echo echo                MENU                    >> myapp/start.bat
-          echo echo ====================================== >> myapp/start.bat
-          echo echo 1. Say Hello >> myapp/start.bat
-          echo echo 2. Show System Info >> myapp/start.bat
-          echo echo 3. Exit >> myapp/start.bat
-          echo echo. >> myapp/start.bat
-          echo set /p choice=Select an option: >> myapp/start.bat
-          echo if %%choice%%==1 goto hello >> myapp/start.bat
-          echo if %%choice%%==2 goto sysinfo >> myapp/start.bat
-          echo if %%choice%%==3 exit >> myapp/start.bat
-          echo goto menu >> myapp/start.bat
-          echo. >> myapp/start.bat
-          echo :hello >> myapp/start.bat
-          echo cls >> myapp/start.bat
-          echo echo Hello from MyApp! 🚀 >> myapp/start.bat
-          echo echo. >> myapp/start.bat
-          echo pause >> myapp/start.bat
-          echo goto menu >> myapp/start.bat
-          echo. >> myapp/start.bat
-          echo :sysinfo >> myapp/start.bat
-          echo cls >> myapp/start.bat
-          echo echo System Information: >> myapp/start.bat
-          echo systeminfo ^| findstr /B /C:"OS Name" /C:"OS Version" >> myapp/start.bat
-          echo echo. >> myapp/start.bat
-          echo pause >> myapp/start.bat
-          echo goto menu >> myapp/start.bat
+          echo "@echo off" > myapp/start.bat
+          echo "title MyApp" >> myapp/start.bat
+          echo "color 0A" >> myapp/start.bat
+          echo "cls" >> myapp/start.bat
+          echo "echo ======================================" >> myapp/start.bat
+          echo "echo        MY APP - OFFICIAL RELEASE" >> myapp/start.bat
+          echo "echo ======================================" >> myapp/start.bat
+          echo "echo." >> myapp/start.bat
+          echo "echo Version: ${{ steps.version.outputs.VERSION }}" >> myapp/start.bat
+          echo "echo." >> myapp/start.bat
+          echo "echo Running on: %%COMPUTERNAME%%" >> myapp/start.bat
+          echo "echo Username: %%USERNAME%%" >> myapp/start.bat
+          echo "echo." >> myapp/start.bat
+          echo "echo Loading..." >> myapp/start.bat
+          echo "ping localhost -n 2 >nul" >> myapp/start.bat
+          echo "cls" >> myapp/start.bat
 
+          echo ":menu" >> myapp/start.bat
+          echo "echo ======================================" >> myapp/start.bat
+          echo "echo                MENU" >> myapp/start.bat
+          echo "echo ======================================" >> myapp/start.bat
+          echo "echo 1. Say Hello" >> myapp/start.bat
+          echo "echo 2. Show System Info" >> myapp/start.bat
+          echo "echo 3. Exit" >> myapp/start.bat
+          echo "echo." >> myapp/start.bat
+          echo "set /p choice=Select an option:" >> myapp/start.bat
+          echo "if %%choice%%==1 goto hello" >> myapp/start.bat
+          echo "if %%choice%%==2 goto sysinfo" >> myapp/start.bat
+          echo "if %%choice%%==3 exit" >> myapp/start.bat
+          echo "goto menu" >> myapp/start.bat
 
-      - name: Create zip package
-        run: |
-          zip -r myapp-v${{ github.run_number }}.zip myapp
+          echo ":hello" >> myapp/start.bat
+          echo "cls" >> myapp/start.bat
+          echo "echo Hello from MyApp!" >> myapp/start.bat
+          echo "echo." >> myapp/start.bat
+          echo "pause" >> myapp/start.bat
+          echo "goto menu" >> myapp/start.bat
+
+          echo ":sysinfo" >> myapp/start.bat
+          echo "cls" >> myapp/start.bat
+          echo "echo System Information:" >> myapp/start.bat
+          echo "systeminfo | findstr /B /C:\"OS Name\" /C:\"OS Version\"" >> myapp/start.bat
+          echo "echo." >> myapp/start.bat
+          echo "pause" >> myapp/start.bat
+          echo "goto menu" >> myapp/start.bat
+
+      - name: Create zip
+        run: zip -r myapp-${{ steps.version.outputs.VERSION }}.zip myapp
 
       - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release v${{ github.run_number }}
-          draft: false
-          prerelease: false
+        run: |
+          gh release create ${{ steps.version.outputs.VERSION }} \
+            myapp-${{ steps.version.outputs.VERSION }}.zip \
+            --title "Release ${{ steps.version.outputs.VERSION }}" \
+            --notes "Automatic release created by GitHub Actions 🚀"
 
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./myapp-v${{ github.run_number }}.zip
-          asset_name: myapp-v${{ github.run_number }}.zip
-          asset_content_type: application/zip
+
+
+
 
