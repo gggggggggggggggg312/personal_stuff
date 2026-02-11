@@ -9,6 +9,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: List files in repo
+        run: ls -la
+
       - name: Say hello
         run: echo "It works!"
 
