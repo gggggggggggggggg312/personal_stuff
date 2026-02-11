@@ -1,9 +1,9 @@
-name: Release
+name: Auto Real Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 jobs:
   release:
@@ -13,17 +13,42 @@ jobs:
       contents: write
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate build files
+        run: |
+          mkdir myapp
+          echo "# My App" > myapp/README.txt
+          echo "Version: v${{ github.run_number }}" > myapp/version.txt
+          echo "Built on: $(date)" >> myapp/version.txt
+          echo "Repository: ${{ github.repository }}" >> myapp/version.txt
+          echo "Commit: ${{ github.sha }}" >> myapp/version.txt
+          echo "echo Hello from MyApp!" > myapp/start.sh
+          chmod +x myapp/start.sh
+
+      - name: Create zip package
+        run: |
+          zip -r myapp-v${{ github.run_number }}.zip myapp
 
       - name: Create Release
+        id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
-          body: Official release ${{ github.ref_name }}
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
           draft: false
           prerelease: false
 
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./myapp-v${{ github.run_number }}.zip
+          asset_name: myapp-v${{ github.run_number }}.zip
+          asset_content_type: application/zip
 
