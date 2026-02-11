@@ -52,9 +52,11 @@ jobs:
           echo "echo 3. Exit" >> myapp/start.bat
           echo "echo." >> myapp/start.bat
           echo "set /p choice=Select an option:" >> myapp/start.bat
-          echo "if %%choice%%==1 goto hello" >> myapp/start.bat
-          echo "if %%choice%%==2 goto sysinfo" >> myapp/start.bat
-          echo "if %%choice%%==3 exit" >> myapp/start.bat
+          echo "if \"%%choice%%\"==\"1\" goto hello" >> myapp/start.bat
+          echo "if \"%%choice%%\"==\"2\" goto sysinfo" >> myapp/start.bat
+          echo "if \"%%choice%%\"==\"3\" exit" >> myapp/start.bat
+          echo "echo Invalid option." >> myapp/start.bat
+          echo "pause" >> myapp/start.bat
           echo "goto menu" >> myapp/start.bat
 
           echo ":hello" >> myapp/start.bat
