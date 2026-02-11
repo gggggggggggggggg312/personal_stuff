@@ -22,11 +22,52 @@ jobs:
           echo "# My App" > myapp/README.txt
           echo "Version: v${{ github.run_number }}" > myapp/version.txt
           echo "Built on: $(date)" >> myapp/version.txt
-          echo "Repository: ${{ github.repository }}" >> myapp/version.txt
-          echo "Commit: ${{ github.sha }}" >> myapp/version.txt
-          echo "@echo off" > myapp/start.bat
-          echo "echo Hello from MyApp!" >> myapp/start.bat
-          echo "pause" >> myapp/start.bat
+
+          echo @echo off > myapp/start.bat
+          echo title MyApp v${{ github.run_number }} >> myapp/start.bat
+          echo color 0A >> myapp/start.bat
+          echo cls >> myapp/start.bat
+          echo echo ====================================== >> myapp/start.bat
+          echo echo        MY APP - OFFICIAL RELEASE       >> myapp/start.bat
+          echo echo ====================================== >> myapp/start.bat
+          echo echo. >> myapp/start.bat
+          echo echo Version: v${{ github.run_number }} >> myapp/start.bat
+          echo echo. >> myapp/start.bat
+          echo echo Running on: %%COMPUTERNAME%% >> myapp/start.bat
+          echo echo Username: %%USERNAME%% >> myapp/start.bat
+          echo echo. >> myapp/start.bat
+          echo echo Loading... >> myapp/start.bat
+          echo ping localhost -n 2 ^>nul >> myapp/start.bat
+          echo cls >> myapp/start.bat
+          echo :menu >> myapp/start.bat
+          echo echo ====================================== >> myapp/start.bat
+          echo echo                MENU                    >> myapp/start.bat
+          echo echo ====================================== >> myapp/start.bat
+          echo echo 1. Say Hello >> myapp/start.bat
+          echo echo 2. Show System Info >> myapp/start.bat
+          echo echo 3. Exit >> myapp/start.bat
+          echo echo. >> myapp/start.bat
+          echo set /p choice=Select an option: >> myapp/start.bat
+          echo if %%choice%%==1 goto hello >> myapp/start.bat
+          echo if %%choice%%==2 goto sysinfo >> myapp/start.bat
+          echo if %%choice%%==3 exit >> myapp/start.bat
+          echo goto menu >> myapp/start.bat
+          echo. >> myapp/start.bat
+          echo :hello >> myapp/start.bat
+          echo cls >> myapp/start.bat
+          echo echo Hello from MyApp! 🚀 >> myapp/start.bat
+          echo echo. >> myapp/start.bat
+          echo pause >> myapp/start.bat
+          echo goto menu >> myapp/start.bat
+          echo. >> myapp/start.bat
+          echo :sysinfo >> myapp/start.bat
+          echo cls >> myapp/start.bat
+          echo echo System Information: >> myapp/start.bat
+          echo systeminfo ^| findstr /B /C:"OS Name" /C:"OS Version" >> myapp/start.bat
+          echo echo. >> myapp/start.bat
+          echo pause >> myapp/start.bat
+          echo goto menu >> myapp/start.bat
+
 
       - name: Create zip package
         run: |
