@@ -15,7 +15,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+        
       - name: Generate build files
         run: |
           mkdir myapp
@@ -24,8 +24,9 @@ jobs:
           echo "Built on: $(date)" >> myapp/version.txt
           echo "Repository: ${{ github.repository }}" >> myapp/version.txt
           echo "Commit: ${{ github.sha }}" >> myapp/version.txt
-          echo "echo Hello from MyApp!" > myapp/start.sh
-          chmod +x myapp/start.sh
+          echo "@echo off" > myapp/start.bat
+          echo "echo Hello from MyApp!" >> myapp/start.bat
+          echo "pause" >> myapp/start.bat
 
       - name: Create zip package
         run: |
