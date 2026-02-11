@@ -73,6 +73,10 @@ jobs:
           echo "echo." >> myapp/start.bat
           echo "pause" >> myapp/start.bat
           echo "goto menu" >> myapp/start.bat
+          
+          - name: Fix Windows line endings
+            run: sed -i 's/$/\r/' myapp/start.bat
+
 
       - name: Create zip
         run: zip -r myapp-${{ steps.version.outputs.VERSION }}.zip myapp
