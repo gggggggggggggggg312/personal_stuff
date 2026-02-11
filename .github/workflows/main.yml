@@ -13,7 +13,7 @@ jobs:
       - run: echo "🐧 Running on ${{ runner.os }}!"
       - run: echo "🔎 Branch: ${{ github.ref }} | Repo: ${{ github.repository }}."
       - name: Check out repository code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
       - run: echo "💡 Repo cloned."
       - run: echo "🖥️ Ready to test code."
       - name: List files
