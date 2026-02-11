@@ -6,6 +6,9 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Say hello
         run: echo "It works!"
 
@@ -16,5 +19,6 @@ jobs:
         run: |
           echo "Repository: ${{ github.repository }}"
           echo "Branch ref: ${{ github.ref }}"
+
 
 
